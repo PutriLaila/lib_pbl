@@ -1,0 +1,27 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:new_shop/model/add_category_model.dart';
+
+class FirebaseService {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> addCategory(Category category) async {
+    await _firestore.collection('categories').add({
+      'name': category.name,
+      'description': category.description,
+      'imageUrl': category.imageUrl,
+    });
+  }
+
+  Stream<List<Category>> getCategories() {
+    return _firestore.collection('categories').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        return Category(
+          name: data['name'],
+          description: data['description'],
+          imageUrl: data['imageUrl'],
+        );
+      }).toList();
+    });
+  }
+}
