@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:new_shop/screens/profile_page.dart';
 import 'package:new_shop/screens/registration_screen.dart';
 import 'package:new_shop/screens/home_screen.dart';
 
@@ -156,13 +158,31 @@ class _LoginScreenState extends State<LoginScreen> {
           password: passwordController.text,
         );
 
-        // If login is successful, navigate to the home screen
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MyHomePage()),
-        );
+        // Get the user data from Firestore
+        DocumentSnapshot userData = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredential.user?.uid)
+            .get();
+
+        // Check the user's role
+        String userRole = userData['role'];
+
+        // Navigate based on the role
+        if (userRole == 'admin') {
+          // Navigate to admin screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => MyHomePage()),
+          );
+        } else {
+          // Navigate to customer screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => ProfileApp()),
+          );
+        }
       } catch (e) {
-        // Handle specific login errors
+        // Handle login errors
         if (e is FirebaseAuthException) {
           String errorMessage = "";
           switch (e.code) {
